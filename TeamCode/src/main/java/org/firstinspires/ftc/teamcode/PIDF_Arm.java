@@ -7,12 +7,16 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.MotorType;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 @TeleOp
 @MotorType(gearing=0.5, ticksPerRev = 3895.9, maxRPM = 43)
-public class PIDF_Arm extends OpMode {
+@DeviceProperties(name = "PIDF_Motor", xmlTag = "PIDF_Motor")
+public class PIDF_Arm {
     private PIDController controller;
 
     public static double p = 00.01, i = 0, d = 0.001;
@@ -24,16 +28,17 @@ public class PIDF_Arm extends OpMode {
     private int current;
     private final double ticks_in_degrees = 3895.9 / 360;
     private DcMotorEx arm;
+    private Telemetry telemetry;
 
-    @Override
+    public PIDF_Arm(DcMotorEx arm, Telemetry telemetry){
+        this.arm = arm;
+        this.telemetry = telemetry;
+    }
     public void init(){
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        arm = hardwareMap.get(DcMotorEx.class, "arm");
     }
 
-    @Override
     public void loop(){
         controller.setPID(p, i, d);
         current = arm.getCurrentPosition();
@@ -47,10 +52,10 @@ public class PIDF_Arm extends OpMode {
         telemetry.addData("target", target);
         telemetry.update();
     }
-    public int getTarget() {
+    public int getTargetPos() {
         return target;
     }
-    public void setTarget(int target) {
+    public void setTargetPos(int target) {
         this.target = target;
     }
 
@@ -61,10 +66,10 @@ public class PIDF_Arm extends OpMode {
         this.power = power;
     }
 
-    public int getCurrent() {
+    public int getCurrentPos() {
         return current;
     }
-    public void setCurrent(int current) {
+    public void setCurrentPos(int current) {
         this.current = current;
     }
 }

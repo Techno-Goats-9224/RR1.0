@@ -22,7 +22,7 @@ public class Teleop extends OpMode {
     private DcMotorEx leftFront;
     private DcMotorEx rightFront;
     private DcMotorEx leftBack;
-    private PIDF_Arm arm;
+    private DcMotorEx arm;
     private DcMotorEx intakel;
     private DcMotorEx intaker;
     private ServoImplEx clawl;
@@ -85,7 +85,7 @@ public class Teleop extends OpMode {
     public void loop() {
         if (gamepad2.dpad_up) {
             //outtake
-            arm.setTarget(4000);
+            arm.setTargetPos(4000);
 
             /*arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             if (1500>arm.getCurrentPosition()&& arm.getCurrentPosition()>0) {
@@ -99,7 +99,7 @@ public class Teleop extends OpMode {
         } else if (gamepad2.dpad_down) {
             //intake
             //arm.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-            arm.setTarget(20);
+            arm.setTargetPos(20);
              /*
             if(arm.getCurrentPosition() > 100) {
                 arm.setPower(0.75);
@@ -109,7 +109,7 @@ public class Teleop extends OpMode {
             */
         } else if (gamepad2.dpad_right) {
             //transport
-            arm.setTarget(400);
+            arm.setTargetPos(400);
             /*if(arm.getCurrentPosition() < 1200) {
                 arm.setPower(-1);
             } else if(arm.getCurrentPosition() > 1500){
@@ -123,7 +123,7 @@ public class Teleop extends OpMode {
         } else if (gamepad2.right_trigger > 0.1) {
             //manual down
             arm.setPower(1);
-        } */else if(arm.getTarget() == arm.getCurrent()) {
+        } */else if(arm.getTargetPos() == arm.getCurrentPos()) {
             arm.setPower(0);
         }
         if (gamepad2.square) {
@@ -226,7 +226,7 @@ public class Teleop extends OpMode {
         telemetry.addData("Front Left Encoder (perp) inches", encoderTicksToInches(leftFront.getCurrentPosition()));
         telemetry.addData("Negative Back Right Encoder (para) inches", encoderTicksToInches(-rightBack.getCurrentPosition()));
         telemetry.addData("imu yaw",imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX,AngleUnit.DEGREES).firstAngle);
-        telemetry.addData("arm encoder", arm.getCurrent());
+        telemetry.addData("arm encoder", arm.getCurrentPos());
         byte[] pixyBytes1 = pixy.readShort(0x51, 5); // need this
         telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
         telemetry.addData("x position of largest block of sig 1", pixyBytes1[1]); // need this
