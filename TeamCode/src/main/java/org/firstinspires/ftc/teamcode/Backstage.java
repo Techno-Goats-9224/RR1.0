@@ -53,27 +53,27 @@ public class Backstage extends LinearOpMode {
     double heading;
     boolean red = false;
     double desiredDirection;
-    //for forward: all four motors need to be negative
+    //for forward: left side need to be negative
     public void drive(double inches, directions dir, double power) {
-        lastParEncoder_in = encoderTicksToInches(rightBack.getCurrentPosition());
+        lastParEncoder_in = encoderTicksToInches(-rightBack.getCurrentPosition());
         lastPerpEncoder_in = encoderTicksToInches(leftFront.getCurrentPosition());
-        xPos_in = encoderTicksToInches(rightBack.getCurrentPosition());
+        xPos_in = encoderTicksToInches(-rightBack.getCurrentPosition());
         yPos_in = encoderTicksToInches(leftFront.getCurrentPosition());
 
         if(dir == directions.FORWARD) {
             while (((Math.abs(xPos_in - (inches + lastParEncoder_in))) > 0.5) && opModeIsActive()) {
-                xPos_in = encoderTicksToInches(rightBack.getCurrentPosition());
+                xPos_in = encoderTicksToInches(-rightBack.getCurrentPosition());
                 desiredDirection = (xPos_in - (inches + lastParEncoder_in)) / (Math.abs(xPos_in - (inches + lastParEncoder_in)));
 
                 leftFront.setPower(-desiredDirection * power);
                 leftBack.setPower(-desiredDirection * power);
                 rightFront.setPower(desiredDirection * power);
-                rightBack.setPower(-desiredDirection * power);
+                rightBack.setPower(desiredDirection * power);
 
-                telemetry.addData("Front Left Encoder (perp) ticks", leftFront.getCurrentPosition());
-                telemetry.addData("Negative Back Right Encoder (para) ticks", -rightBack.getCurrentPosition());
-                telemetry.addData("Front Left Encoder (perp) inches", encoderTicksToInches(leftFront.getCurrentPosition()));
-                telemetry.addData("Negative Back Right Encoder (para) inches", encoderTicksToInches(-rightBack.getCurrentPosition()));
+                telemetry.addData("negative Right Back Encoder (para) ticks", -rightBack.getCurrentPosition());
+                telemetry.addData("left front Encoder (perp) ticks", leftFront.getCurrentPosition());
+                telemetry.addData("negative right back Encoder (para) inches", encoderTicksToInches(-rightBack.getCurrentPosition()));
+                telemetry.addData("Negative left front Encoder (perp) inches", encoderTicksToInches(leftFront.getCurrentPosition()));
 
                 telemetry.addData("offset from position:", xPos_in - (inches + lastParEncoder_in));
                 telemetry.update();
@@ -88,10 +88,10 @@ public class Backstage extends LinearOpMode {
                 leftFront.setPower(desiredDirection * power);
                 leftBack.setPower(-desiredDirection * power);
                 rightFront.setPower(desiredDirection * power);
-                rightBack.setPower(desiredDirection * power);
+                rightBack.setPower(-desiredDirection * power);
 
-                telemetry.addData("Front Left Encoder (perp) ticks", leftFront.getCurrentPosition());
-                telemetry.addData("Front Left Encoder (perp) inches", encoderTicksToInches(leftFront.getCurrentPosition()));
+                telemetry.addData("right back Encoder (perp) ticks", -rightBack.getCurrentPosition());
+                telemetry.addData("right back Encoder (perp) inches", encoderTicksToInches(-rightBack.getCurrentPosition()));
 
                 telemetry.addData("offset from position:", yPos_in - (inches + lastPerpEncoder_in));
                 telemetry.update();
@@ -111,7 +111,7 @@ public class Backstage extends LinearOpMode {
             leftFront.setPower(-desiredDirection * power);
             leftBack.setPower(-desiredDirection * power);
             rightFront.setPower(-desiredDirection * power);
-            rightBack.setPower(desiredDirection * power);
+            rightBack.setPower(-desiredDirection * power);
 
             telemetry.addData("degrees:", degrees);
             telemetry.addData("heading", heading);
@@ -124,7 +124,7 @@ public class Backstage extends LinearOpMode {
                 leftFront.setPower(power);
                 leftBack.setPower(power);
                 rightFront.setPower(power);
-                rightBack.setPower(-power);
+                rightBack.setPower(power);
 
                 telemetry.addData("Yaw degrees: ",  imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle);
                 telemetry.update();
@@ -135,7 +135,7 @@ public class Backstage extends LinearOpMode {
                 leftFront.setPower(-power);
                 leftBack.setPower(-power);
                 rightFront.setPower(-power);
-                rightBack.setPower(power);
+                rightBack.setPower(-power);
 
                 telemetry.addData("Yaw degrees: ",imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle);
                 telemetry.update();
@@ -144,12 +144,6 @@ public class Backstage extends LinearOpMode {
     }
     @Override
     public void runOpMode() {
-        boolean targetFound     = false;    // Set to true when an AprilTag target is detected
-        double  drive           = 0;        // Desired forward power/speed (-1 to +1)
-        double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
-        double  turn            = 0;        // Desired turning power/speed (-1 to +1)
-
-
         leftBack = hardwareMap.get(DcMotorEx.class,"leftBack");
         rightBack = hardwareMap.get(DcMotorEx.class,"rightBack");
         leftFront = hardwareMap.get(DcMotorEx.class,"leftFront");
@@ -159,6 +153,7 @@ public class Backstage extends LinearOpMode {
         clawr = hardwareMap.get(ServoImplEx.class,"clawr");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         rotate = hardwareMap.get(Servo.class, "rotate");
+        pixy = hardwareMap.get(Pixy.class, "pixy"); // need this
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
@@ -179,8 +174,6 @@ public class Backstage extends LinearOpMode {
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -195,12 +188,12 @@ public class Backstage extends LinearOpMode {
         clawr.setPosition(0.6);
         rotate.setPosition(0.8);
 
-        arm.setTargetPosition(-200);
+        arm.setTargetPosition(-300);
         arm.setPower(1);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while(arm.isBusy() && !isStopRequested()){}
-
-        pixy = hardwareMap.get(Pixy.class, "pixy"); // need this
+        while(arm.isBusy() && !isStopRequested()){
+            telemetry.addData("arm", "is busy not moving");
+        }
 
         //voodoo
         while(gamepad1.left_bumper && !isStopRequested()) {
@@ -217,56 +210,80 @@ public class Backstage extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.addData("red side? ", red);
         telemetry.update();
-
+        byte[] pixyBytes1; // need this
+        byte[] pixyBytes2; // need this
+        byte[] pixyBytes3; // need this
+        byte[] pixyBytes4; // need this
+        byte[] pixyBytes5;
+        while(!isStopRequested() && !isStarted()) {
+            pixyBytes1 = pixy.readShort(0x51, 5); // need this
+            telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
+            telemetry.addData("x position of largest block of sig 1", pixyBytes1[1]); // need this
+            pixyBytes2 = pixy.readShort(0x52, 2);
+            telemetry.addData("number of Signature 2", pixyBytes2[0]); // need this
+            telemetry.addData("x position of largest block of sig 2", pixyBytes2[1]); // need this
+            pixyBytes3 = pixy.readShort(0x53, 2);
+            telemetry.addData("number of Signature 3", pixyBytes3[0]); // need this
+            telemetry.addData("x position of largest block of sig 3", pixyBytes3[1]); // need this
+            pixyBytes4 = pixy.readShort(0x54, 2);
+            telemetry.addData("number of Signature 4", pixyBytes4[0]); // need this
+            telemetry.addData("x position of largest block of sig 4", pixyBytes4[1]); // need this
+            pixyBytes5 = pixy.readShort(0x55, 2);
+            telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
+            telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
+            telemetry.update();
+        }
         // Wait for driver to press start
         waitForStart();
 
         //Pixy look for team prop
-        //int byte1Avg = pixy.readAvg(0x51, 5, 1, telemetry);
-        //int byte2Avg = pixy.readAvg(0x52, 5, 1, telemetry);
-        //runtime.reset();
-        //while(runtime.seconds() < 5 && opModeIsActive()) {}
-        byte[] pixyBytes1 = pixy.readShort(0x51, 5); // need this
-        int byte1Avg = 0;
-        byte[] pixyBytes2 = pixy.readShort(0x52, 2); // need this
-        int byte2Avg = 0;
-        byte[] pixyBytes6 = pixy.readShort(0x56, 2);
-        int byte6Avg = 0;
+        int redAvg = 0;
+        int blueAvg = 0;
+        int numRedSigs = 3; //IF YOU COMMENT STUFF OUT, CHANGE THIS
+        int numBlueSigs = 2; //IF YOU COMMENT STUFF OUT, CHANGE THIS
         for (int i = 1; i < 21; i++) {
             pixyBytes1 = pixy.readShort(0x51, 5); // need this
-            byte1Avg = byte1Avg + pixyBytes1[1];
+            redAvg = redAvg + pixyBytes1[1];
             telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
             telemetry.addData("x position of largest block of sig 1", pixyBytes1[1]); // need this
             pixyBytes2 = pixy.readShort(0x52, 2);
-            byte2Avg = byte2Avg + pixyBytes2[1];
+            blueAvg = blueAvg + pixyBytes2[1];
             telemetry.addData("number of Signature 2", pixyBytes2[0]); // need this
             telemetry.addData("x position of largest block of sig 2", pixyBytes2[1]); // need this
-            pixyBytes6 = pixy.readShort(0x56, 2);
-            byte6Avg = byte6Avg + pixyBytes6[1];
-            telemetry.addData("number of Signature 6", pixyBytes6[0]); // need this
-            telemetry.addData("x position of largest block of sig 6", pixyBytes6[1]); // need this
+            pixyBytes3 = pixy.readShort(0x53, 2);
+            redAvg = redAvg + pixyBytes3[1];
+            telemetry.addData("number of Signature 3", pixyBytes3[0]); // need this
+            telemetry.addData("x position of largest block of sig 3", pixyBytes3[1]); // need this
+            pixyBytes4 = pixy.readShort(0x54, 2);
+            blueAvg = blueAvg + pixyBytes4[1];
+            telemetry.addData("number of Signature 4", pixyBytes4[0]); // need this
+            telemetry.addData("x position of largest block of sig 4", pixyBytes4[1]); // need this
+            pixyBytes5 = pixy.readShort(0x55, 2);
+            redAvg = redAvg + pixyBytes5[1];
+            telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
+            telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
             telemetry.update();
             if(red == true){
-                if (byte1Avg / i < 0) {
-                    position = 'C';
-                } else if (byte1Avg / i > 0) {
+                int redPos = redAvg / (i*numRedSigs);
+                if (redPos <= 100) {
                     position = 'L';
+                } else if (redPos > 100 && redPos < 200) {
+                    position = 'C';
                 } else {
                     position = 'R';
                 }
             }
             if(red == false){
-                if(byte2Avg / i > 0 || byte6Avg / i  > 0){
+                int bluePos = blueAvg / (i*numBlueSigs);
+                if(bluePos <= 100){
                     position = 'L';
-                } else if (byte2Avg / i < 0 || byte6Avg / i < 0){
+                } else if (bluePos > 100 && bluePos < 200){
                     position = 'C';
                 } else {
                     position = 'R';
                 }
             }
-        }
-        runtime.reset();
-        while(runtime.seconds() < 5 && opModeIsActive()) {}
+        }//close pixy for loop
 
         //Robot needs to drive and move forward like 24in ish
         drive(32, directions.FORWARD, 0.25);
