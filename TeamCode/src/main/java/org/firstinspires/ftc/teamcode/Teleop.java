@@ -22,7 +22,7 @@ public class Teleop extends OpMode {
     private DcMotorEx leftFront;
     private DcMotorEx rightFront;
     private DcMotorEx leftBack;
-    private DcMotorEx DcArm;
+    private DcMotorEx dcArm;
     private DcMotorEx intakel;
     private DcMotorEx intaker;
     private ServoImplEx clawl;
@@ -36,7 +36,7 @@ public class Teleop extends OpMode {
     public void init() {
         intakel = hardwareMap.get(DcMotorEx.class,"intakel");
         intaker = hardwareMap.get(DcMotorEx.class,"intaker");
-        DcArm = hardwareMap.get(DcMotorEx.class,"arm");
+        dcArm = hardwareMap.get(DcMotorEx.class,"arm");
         clawl = hardwareMap.get(ServoImplEx.class,"clawl");
         clawr = hardwareMap.get(ServoImplEx.class,"clawr");
         leftBack = hardwareMap.get(DcMotorEx.class,"leftBack");
@@ -72,8 +72,10 @@ public class Teleop extends OpMode {
         clawr.setDirection(Servo.Direction.REVERSE);
         rotate.setDirection(Servo.Direction.REVERSE);
 
-        arm = new PIDF_Arm(DcArm, telemetry);
+        dcArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+
+        arm = new PIDF_Arm(dcArm, telemetry);
         arm.init();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -89,7 +91,7 @@ public class Teleop extends OpMode {
     public void loop() {
         if (gamepad2.dpad_up) {
             //outtake
-            arm.setTargetPos(-4000);
+            //arm.setTargetPos(-4000);
 
             /*arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             if (1500>arm.getCurrentPosition()&& arm.getCurrentPosition()>0) {
@@ -103,7 +105,7 @@ public class Teleop extends OpMode {
         } else if (gamepad2.dpad_down) {
             //intake
             //arm.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-            arm.setTargetPos(-20);
+            //arm.setTargetPos(-20);
              /*
             if(arm.getCurrentPosition() > 100) {
                 arm.setPower(0.75);
@@ -113,7 +115,7 @@ public class Teleop extends OpMode {
             */
         } else if (gamepad2.dpad_right) {
             //transport
-            arm.setTargetPos(-1000);
+            //arm.setTargetPos(-3000);
             /*if(arm.getCurrentPosition() < 1200) {
                 arm.setPower(-1);
             } else if(arm.getCurrentPosition() > 1500){
@@ -121,14 +123,14 @@ public class Teleop extends OpMode {
             } else{
                 arm.setPower(0);
             }*/
-        }/* else if (gamepad2.right_bumper) {
-            //manual up
-            arm.setPower(-1);
-        } else if (gamepad2.right_trigger > 0.1) {
+        } else if (gamepad2.right_bumper) {
             //manual down
-            arm.setPower(1);
-        } */else if(arm.isBusy() == false) {
-            arm.setPower(0);
+            dcArm.setPower(1);
+        } else if (gamepad2.right_trigger > 0.1) {
+            //manual up
+            dcArm.setPower(-gamepad2.right_trigger);
+        } else /*if(arm.isBusy() == false)*/ {
+            dcArm.setPower(0);
         }
         if (gamepad2.square) {
             //open
@@ -146,7 +148,7 @@ public class Teleop extends OpMode {
             clawr.setPosition(0.6);
         }
 
-        if (gamepad2.left_trigger > 0.1) {
+        if (gamepad2.left_trigger > 0.05) {
             //up above field (actually closer to flat)
             rotate.setPosition(0.4);
         } else if (gamepad2.left_bumper) {
@@ -169,19 +171,16 @@ public class Teleop extends OpMode {
         double lx;
         double rx;
 
-        /*if(gamepad1.right_bumper==true) {
+        if(gamepad1.right_trigger >= 0.05) {
             ly = -gamepad1.left_stick_y * 0.5;
             lx = gamepad1.left_stick_x * 0.5;
             rx = gamepad1.right_stick_x * 0.5;
         }
         else {
-
-         */
-        ly = -gamepad1.left_stick_y;
-        lx = gamepad1.left_stick_x;
-        rx = gamepad1.right_stick_x;
-
-        //}
+            ly = -gamepad1.left_stick_y;
+            lx = gamepad1.left_stick_x;
+            rx = gamepad1.right_stick_x;
+        }
         leftFront.setPower(ly + lx + rx);
         leftBack.setPower(ly - lx + rx);
         rightFront.setPower(-ly + lx + rx);
@@ -217,7 +216,7 @@ public class Teleop extends OpMode {
         rightBack.setPower(backRightPower);
          */
 
-        arm.loop(); //this always needs to be here for arm to work
+        //arm.loop(); //this always needs to be here for arm to work
 
         telemetry.addData("front left power", leftFront.getPower());
         telemetry.addData("front right power", rightFront.getPower());

@@ -25,7 +25,8 @@ public class Backstage extends LinearOpMode {
     private DcMotor leftBack;
     private ServoImplEx clawl;
     private ServoImplEx clawr;
-    private DcMotorEx arm;
+    private DcMotorEx dcArm;
+    private PIDF_Arm arm;
     private BNO055IMU imu;
     private Servo rotate;
     private enum directions{
@@ -148,7 +149,7 @@ public class Backstage extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotorEx.class,"rightBack");
         leftFront = hardwareMap.get(DcMotorEx.class,"leftFront");
         rightFront = hardwareMap.get(DcMotorEx.class,"rightFront");
-        arm = hardwareMap.get(DcMotorEx.class,"arm");
+        dcArm = hardwareMap.get(DcMotorEx.class,"arm");
         clawl = hardwareMap.get(ServoImplEx.class,"clawl");
         clawr = hardwareMap.get(ServoImplEx.class,"clawr");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
@@ -174,26 +175,24 @@ public class Backstage extends LinearOpMode {
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        /*arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);*/
+        PIDF_Arm arm = new PIDF_Arm(dcArm, telemetry);
+        arm.init();
 
         clawl.setPwmRange(new PwmControl.PwmRange(500, 2500));
         clawr.setPwmRange(new PwmControl.PwmRange(500, 2500));
         clawl.setDirection(Servo.Direction.REVERSE);
         clawr.setDirection(Servo.Direction.REVERSE);
         rotate.setDirection(Servo.Direction.REVERSE);
-        //close
+
         clawl.setPosition(0.7);
         clawr.setPosition(0.6);
-        rotate.setPosition(0.8);
-
-        arm.setTargetPosition(-300);
-        arm.setPower(1);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while(arm.isBusy() && !isStopRequested()){
-            telemetry.addData("arm", "is busy not moving");
-        }
+        
+        arm.setTargetPos(-300);
+        //arm.setPower(1);
+        //arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //voodoo
         while(gamepad1.left_bumper && !isStopRequested()) {
@@ -206,10 +205,10 @@ public class Backstage extends LinearOpMode {
             if (gamepad1.b) {
                 red = true;
             }
+            arm.loop();
         }
         telemetry.addData("Status", "Initialized");
         telemetry.addData("red side? ", red);
-        telemetry.update();
         byte[] pixyBytes1; // need this
         byte[] pixyBytes2; // need this
         byte[] pixyBytes3; // need this
@@ -232,16 +231,20 @@ public class Backstage extends LinearOpMode {
             telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
             telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
             telemetry.update();
+            arm.loop();
         }
         // Wait for driver to press start
         waitForStart();
+
+        //close claw
+        rotate.setPosition(0.8);
 
         //Pixy look for team prop
         int redAvg = 0;
         int blueAvg = 0;
         int numRedSigs = 3; //IF YOU COMMENT STUFF OUT, CHANGE THIS
         int numBlueSigs = 2; //IF YOU COMMENT STUFF OUT, CHANGE THIS
-        for (int i = 1; i < 21; i++) {
+        for (int i = 1; i < 101; i++) {
             pixyBytes1 = pixy.readShort(0x51, 5); // need this
             redAvg = redAvg + pixyBytes1[1];
             telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this

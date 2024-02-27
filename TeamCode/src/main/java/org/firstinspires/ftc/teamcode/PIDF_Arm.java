@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class PIDF_Arm {
     private PIDController controller;
 
-    public static double p = 00.01, i = 0, d = 0.001;
+    public static double p = 00.03, i = 0, d = 0.001;
     public static double f = 00.05;
 
     private double power = 0;
@@ -47,7 +47,7 @@ public class PIDF_Arm {
         double ff = Math.cos(Math.toRadians(target / ticks_in_degrees)) * f;
         power = pid + ff;
 
-        power = Range.scale(power, -40, 40, -1, 1);
+        power = Range.scale(power, -30, 30, -1, 1);
 
         arm.setPower(power);
 
@@ -72,7 +72,8 @@ public class PIDF_Arm {
         return power;
     }
     public void setPower(double power) {
-        this.power = power;
+        arm.setPower(power * (1/p));
+        busy = true;
     }
 
     public int getCurrentPos() {
@@ -83,5 +84,6 @@ public class PIDF_Arm {
     }
     public boolean isBusy(){
         return busy;
+        //return power > 0.05 || power < - 0.05;
     }
 }
