@@ -152,9 +152,15 @@ public class Teleop extends OpMode {
             //up above field (actually closer to flat)
             rotate.setPosition(0.4);
         } else if (gamepad2.left_bumper) {
+
             //down below field
             rotate.setPosition(.9);
-        } else {
+        } else if (arm.getCurrentPos() < 3000) {
+
+            rotate.setPosition(0.8);
+        } else if (arm.getCurrentPos() >3000){
+            rotate.setPosition(0.4);
+        } else{
             //flat on field (actually closer to above)
             rotate.setPosition(0.8);
         }

@@ -189,8 +189,9 @@ public class Backstage extends LinearOpMode {
 
         clawl.setPosition(0.7);
         clawr.setPosition(0.6);
-        
-        arm.setTargetPos(-300);
+
+        arm.setTargetPos(-400);
+        rotate.setPosition(0.4);
         //arm.setPower(1);
         //arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -235,9 +236,9 @@ public class Backstage extends LinearOpMode {
         }
         // Wait for driver to press start
         waitForStart();
-
-        //close claw
+        arm.setTargetPos(-20);
         rotate.setPosition(0.8);
+        //close claw
 
         //Pixy look for team prop
         int redAvg = 0;
@@ -275,8 +276,7 @@ public class Backstage extends LinearOpMode {
                 } else {
                     position = 'R';
                 }
-            }
-            if(red == false){
+            }else if(red == false){
                 int bluePos = blueAvg / (i*numBlueSigs);
                 if(bluePos <= 100){
                     position = 'L';
