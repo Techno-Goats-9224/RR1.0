@@ -248,13 +248,14 @@ public class Backstage extends LinearOpMode {
         int numRedSigs = 2; //IF YOU COMMENT STUFF OUT, CHANGE THIS
         int numBlueSigs = 2; //IF YOU COMMENT STUFF OUT, CHANGE THIS
         int i = 1;
+        int loops = 0;
         ArrayList<Integer> posR = new ArrayList<Integer>();
         ArrayList<Integer> posB = new ArrayList<Integer>();
         while (i < 201 && opModeIsActive()) {
             pixyBytes1 = pixy.readShort(0x51, 2); // need this
             if (pixyBytes1[0]!=0){
                 //redAvg = redAvg + pixyBytes1[1];
-                //i++;
+                loops++;
                 //posR.add((int)pixyBytes1[1]);
             }
             telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
@@ -262,7 +263,7 @@ public class Backstage extends LinearOpMode {
             pixyBytes2 = pixy.readShort(0x52, 2);
             if (pixyBytes2[1]!=0) {
                 blueAvg = blueAvg + pixyBytes2[1];
-                //i++;
+                loops++;
                 //posB.add((int)pixyBytes2[1]);
             }
             telemetry.addData("number of Signature 2", pixyBytes2[0]); // need this
@@ -271,7 +272,7 @@ public class Backstage extends LinearOpMode {
             pixyBytes3 = pixy.readShort(0x53, 2);
             if (pixyBytes3[0]!=0) {
                 //redAvg = redAvg + pixyBytes3[1];
-                //i++;
+                loops++;
                 posR.add((int)pixyBytes3[1]);
             }
             telemetry.addData("number of Signature 3", pixyBytes3[0]); // need this
@@ -280,7 +281,7 @@ public class Backstage extends LinearOpMode {
             pixyBytes4 = pixy.readShort(0x54, 2);
             if (pixyBytes4[1]!=0) {
                 blueAvg = blueAvg + pixyBytes4[1];
-                //i++;
+                loops++;
                 //posB.add((int)pixyBytes4[1]);
             }
             telemetry.addData("number of Signature 4", pixyBytes4[0]); // need this
@@ -289,23 +290,23 @@ public class Backstage extends LinearOpMode {
             pixyBytes5 = pixy.readShort(0x55, 2);
             //if (pixyBytes5[1]!=0) {
             //    redAvg = redAvg + pixyBytes5[1];
-            //      i++;
+            //      loops++;
             //}
             telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
             telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
             i++;
-            telemetry.addData("num times looped", i);
+            telemetry.addData("num times looped", loops);
             telemetry.update();
 
         }//close pixy for loop
         if(red == true){
-            int redPos = 0;
+            int redSum = 0;
             for(int r = 0; r < posR.size(); r++){
-                redPos += posR.get(r);
-                telemetry.addData("for loop", redPos);
+                redSum += posR.get(r);
+                telemetry.addData("for loop", redSum);
                 telemetry.update();
             }
-            int avgr = redPos / (posR.size());
+            int avgr = redSum / (posR.size());
             if (50<avgr && avgr<90) {
                 position = 'L';
             } else if (avgr > 100 || avgr < -100) {
@@ -330,7 +331,7 @@ public class Backstage extends LinearOpMode {
             } else {
                 position = 'C';
             }*/
-            int bluePos = blueAvg / (i*numBlueSigs);
+            int bluePos = blueAvg / (loops*numBlueSigs);
             telemetry.addData("bluepos", bluePos);
             telemetry.update();
             if (20<bluePos && bluePos<90) {
