@@ -54,7 +54,7 @@ public class Backstage extends LinearOpMode {
     double xPos_in;
     double yPos_in;
     double heading;
-    boolean red = false;
+    boolean red = true;
     double desiredDirection;
     //for forward: left side need to be negative
     public void drive(double inches, directions dir, double power) {
@@ -212,27 +212,27 @@ public class Backstage extends LinearOpMode {
         }
         telemetry.addData("Status", "Initialized");
         telemetry.addData("red side? ", red);
-        byte[] pixyBytes1; // need this
-        byte[] pixyBytes2; // need this
-        byte[] pixyBytes3; // need this
-        byte[] pixyBytes4; // need this
-        byte[] pixyBytes5;
+        short pixyBytes1; // need this
+        short pixyBytes2; // need this
+        short pixyBytes3; // need this
+        short pixyBytes4; // need this
+        short pixyBytes5;
         while(!isStopRequested() && !isStarted()) {
             pixyBytes1 = pixy.readShort(0x51, 8); // need this
-            telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
-            telemetry.addData("x position of largest block of sig 1", pixyBytes1[1]); // need this
+            telemetry.addData("number of Signature 1", pixyBytes1); // need this
+            telemetry.addData("x position of largest block of sig 1", pixyBytes1); // need this
             pixyBytes2 = pixy.readShort(0x52, 8);
-            telemetry.addData("number of Signature 2", pixyBytes2[0]); // need this
-            telemetry.addData("x position of largest block of sig 2", pixyBytes2[1]); // need this
+            telemetry.addData("number of Signature 2", pixyBytes2); // need this
+            telemetry.addData("x position of largest block of sig 2", pixyBytes2); // need this
             pixyBytes3 = pixy.readShort(0x53, 8);
-            telemetry.addData("number of Signature 3", pixyBytes3[0]); // need this
-            telemetry.addData("x position of largest block of sig 3", pixyBytes3[1]); // need this
+            telemetry.addData("number of Signature 3", pixyBytes3); // need this
+            telemetry.addData("x position of largest block of sig 3", pixyBytes3); // need this
             pixyBytes4 = pixy.readShort(0x54, 8);
-            telemetry.addData("number of Signature 4", pixyBytes4[0]); // need this
-            telemetry.addData("x position of largest block of sig 4", pixyBytes4[1]); // need this
+            telemetry.addData("number of Signature 4", pixyBytes4); // need this
+            telemetry.addData("x position of largest block of sig 4", pixyBytes4); // need this
             pixyBytes5 = pixy.readShort(0x55, 8);
-            telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
-            telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
+            telemetry.addData("number of Signature 5", pixyBytes5); // need this
+            telemetry.addData("x position of largest block of sig 5", pixyBytes5); // need this
             telemetry.update();
             arm.loop();
         }
@@ -253,67 +253,79 @@ public class Backstage extends LinearOpMode {
         ArrayList<Integer> posB = new ArrayList<Integer>();
         while (i < 201 && opModeIsActive()) {
             pixyBytes1 = pixy.readShort(0x51, 2); // need this
-            if (pixyBytes1[0]!=0){
-                //redAvg = redAvg + pixyBytes1[1];
+            if (pixyBytes1!=0){
+                redAvg = redAvg + pixyBytes1;
                 loops++;
                 //posR.add((int)pixyBytes1[1]);
             }
-            telemetry.addData("number of Signature 1", pixyBytes1[0]); // need this
-            telemetry.addData("x position of largest block of sig 1", pixyBytes1[1]); // need this
+            telemetry.addData("number of Signature 1", pixyBytes1); // need this
+            telemetry.addData("x position of largest block of sig 1", pixyBytes1); // need this
             pixyBytes2 = pixy.readShort(0x52, 2);
-            if (pixyBytes2[1]!=0) {
-                blueAvg = blueAvg + pixyBytes2[1];
+            if (pixyBytes2!=0) {
+                blueAvg = blueAvg + pixyBytes2;
                 loops++;
                 //posB.add((int)pixyBytes2[1]);
             }
-            telemetry.addData("number of Signature 2", pixyBytes2[0]); // need this
-            telemetry.addData("x position of largest block of sig 2", pixyBytes2[1]); // need this
+            telemetry.addData("number of Signature 2", pixyBytes2); // need this
+            telemetry.addData("x position of largest block of sig 2", pixyBytes2); // need this
 
             pixyBytes3 = pixy.readShort(0x53, 2);
-            if (pixyBytes3[0]!=0) {
-                //redAvg = redAvg + pixyBytes3[1];
+            if (pixyBytes3!=0) {
+                redAvg = redAvg + pixyBytes3;
                 loops++;
-                posR.add((int)pixyBytes3[1]);
+                //posR.add((int)pixyBytes3[1]);
             }
-            telemetry.addData("number of Signature 3", pixyBytes3[0]); // need this
-            telemetry.addData("x position of largest block of sig 3", pixyBytes3[1]); // need this
+            telemetry.addData("number of Signature 3", pixyBytes3); // need this
+            telemetry.addData("x position of largest block of sig 3", pixyBytes3); // need this
 
             pixyBytes4 = pixy.readShort(0x54, 2);
-            if (pixyBytes4[1]!=0) {
-                blueAvg = blueAvg + pixyBytes4[1];
+            if (pixyBytes4!=0) {
+                blueAvg = blueAvg + pixyBytes4;
                 loops++;
                 //posB.add((int)pixyBytes4[1]);
             }
-            telemetry.addData("number of Signature 4", pixyBytes4[0]); // need this
-            telemetry.addData("x position of largest block of sig 4", pixyBytes4[1]); // need this
+            telemetry.addData("number of Signature 4", pixyBytes4); // need this
+            telemetry.addData("x position of largest block of sig 4", pixyBytes4); // need this
 
             pixyBytes5 = pixy.readShort(0x55, 2);
-            //if (pixyBytes5[1]!=0) {
-            //    redAvg = redAvg + pixyBytes5[1];
-            //      loops++;
-            //}
-            telemetry.addData("number of Signature 5", pixyBytes5[0]); // need this
-            telemetry.addData("x position of largest block of sig 5", pixyBytes5[1]); // need this
+            if (pixyBytes5!=0) {
+               redAvg = redAvg + pixyBytes5;
+                  loops++;
+            }
+            telemetry.addData("number of Signature 5", pixyBytes5); // need this
+            telemetry.addData("x position of largest block of sig 5", pixyBytes5); // need this
             i++;
             telemetry.addData("num times looped", loops);
             telemetry.update();
 
         }//close pixy for loop
         if(red == true){
-            int redSum = 0;
+            int redPos = redAvg / (loops + 1);
+            telemetry.addData("redpos", redPos);
+            telemetry.update();
+            if (redPos < 350) {
+                position = 'L';
+            } else if (redPos > 400) {
+                position = 'R';
+            } else {
+                position = 'C';
+            }
+           /* int redSum = 0;
             for(int r = 0; r < posR.size(); r++){
                 redSum += posR.get(r);
-                telemetry.addData("for loop", redSum);
-                telemetry.update();
+                telemetry.addData("sum", redSum);
             }
-            int avgr = redSum / (posR.size());
-            if (50<avgr && avgr<90) {
+            int avgr = redSum / (posR.size() + 1);
+            telemetry.addData("division", avgr);
+            telemetry.update();
+            if (20<avgr && avgr<90) {
                 position = 'L';
-            } else if (avgr > 100 || avgr < -100) {
-                position = 'C';
-            } else {
+            } else if (-20 > avgr && -90 < avgr) {
                 position = 'R';
+            } else {
+                position = 'C';
             }
+            */
         }else if(red == false){
             /*int bluePos = 0;
             telemetry.addData("b size", posB.size());
@@ -331,19 +343,19 @@ public class Backstage extends LinearOpMode {
             } else {
                 position = 'C';
             }*/
-            int bluePos = blueAvg / (loops*numBlueSigs);
+            int bluePos = blueAvg / (loops + 1);
             telemetry.addData("bluepos", bluePos);
             telemetry.update();
-            if (20<bluePos && bluePos<90) {
+            if (bluePos < 350) {
                 position = 'L';
-            } else if (-20 > bluePos && -90 < bluePos) {
+            } else if (bluePos > 400) {
                 position = 'R';
             } else {
                 position = 'C';
             }
         }
-        runtime.reset();
-        while (runtime.seconds()<5 && opModeIsActive()){}
+        //runtime.reset();
+        //while (runtime.seconds()<5 && opModeIsActive()){}
         /*while (dcArm.getCurrentPosition()>-700&& opModeIsActive()){
             dcArm.setPower(-.5);
         }
