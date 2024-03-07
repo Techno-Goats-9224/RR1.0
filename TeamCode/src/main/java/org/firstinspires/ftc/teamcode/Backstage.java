@@ -54,7 +54,8 @@ public class Backstage extends LinearOpMode {
     double xPos_in;
     double yPos_in;
     double heading;
-    boolean red = true;
+    boolean red = false;
+    boolean backstage = true;
     double desiredDirection;
     //for forward: left side need to be negative
     public void drive(double inches, directions dir, double power) {
@@ -199,25 +200,36 @@ public class Backstage extends LinearOpMode {
 
         //voodoo
         while(gamepad1.left_bumper && !isStopRequested()) {
-            telemetry.addData("x or square: ", "blue");
-            telemetry.addData("b or circle: ", "red");
+            telemetry.addData("square: ", "blue");
+            telemetry.addData("circle: ", "red");
+            telemetry.addData("triangle: ", "backstage");
+            telemetry.addData("cross: ", "audience");
             telemetry.update();
-            if (gamepad1.x) {
+            if (gamepad1.square) {
                 red = false;
             }
-            if (gamepad1.b) {
+            if (gamepad1.circle) {
                 red = true;
             }
+            if (gamepad1.triangle){
+                backstage = true;
+            }
+            if(gamepad1.cross){
+                backstage = false;
+            }
+
             arm.loop();
         }
-        telemetry.addData("Status", "Initialized");
-        telemetry.addData("red side? ", red);
         short pixyBytes1; // need this
         short pixyBytes2; // need this
         short pixyBytes3; // need this
         short pixyBytes4; // need this
         short pixyBytes5;
         while(!isStopRequested() && !isStarted()) {
+            telemetry.addData("Status", "Initialized");
+            telemetry.addData("red side? ", red);
+            telemetry.addData("backstage? ", backstage);
+
             pixyBytes1 = pixy.readShort(0x51, 8); // need this
             telemetry.addData("number of Signature 1", pixyBytes1); // need this
             telemetry.addData("x position of largest block of sig 1", pixyBytes1); // need this
@@ -364,30 +376,68 @@ public class Backstage extends LinearOpMode {
         drive(32, directions.FORWARD, 0.25);
 
         //If Drop pixel at left: turn left 90 degrees then open claw then turn right to get back on track.
-            if (position == 'L'){
-                turn(90, directions.LEFT, 0.25);
-                drive(1.5, directions.FORWARD, 0.25);
-                arm.setTargetPos(-100);
-                clawr.setPosition(0.7);
-                drive(-3, directions.FORWARD, 0.25);
-            }
-            else if (position == 'C'){
-                // Drop pixel at center: drive past then turn around 180 degrees and then drop pixel and then turn another 180 degrees.
-                drive(-1, directions.FORWARD, 0.25);
-                arm.setTargetPos(-100);
-                //open
-                clawr.setPosition(0.7);
-                drive(-4, directions.FORWARD, 0.25);
-            }
-            else if(position== 'R'){
-                //Then turn right 90 degrees drop pixel at right
+        if (position == 'L'){
+            turn(90, directions.LEFT, 0.25);
+            drive(1.5, directions.FORWARD, 0.25);
+            arm.setTargetPos(-100);
+            clawr.setPosition(0.7);
+            drive(-3, directions.FORWARD, 0.25);
+            if(backstage == true && red == true){
                 turn(-90, directions.RIGHT, .25);
-                drive(1.5, directions.FORWARD, .25);
-                arm.setTargetPos(-100);
-                clawr.setPosition(0.7);
+                drive(30, directions.FORWARD, .25);
+                clawl.setPosition(0.6);
                 drive(-3, directions.FORWARD, .25);
+                if (red == true) {
+                    drive(-100, directions.SIDE, .25);
+                } else if (red == false) {
+                    drive(100, directions.SIDE, .25);
+                }
+            }
+        }
+        else if (position == 'C'){
+            // Drop pixel at center: drive past then turn around 180 degrees and then drop pixel and then turn another 180 degrees.
+            drive(-1, directions.FORWARD, 0.25);
+            arm.setTargetPos(-100);
+            //open
+            clawr.setPosition(0.7);
+            drive(-4, directions.FORWARD, 0.25);
+            if(backstage == true){
+                if(red == true){
+                    turn(-90, directions.RIGHT, .25);
+                }
+                else {
+                    turn(90, directions.RIGHT, .25);
+                }
+                drive(30, directions.FORWARD, .25);
+                clawl.setPosition(0.6);
+                drive(-3, directions.FORWARD, .25);
+                if (red == true) {
+                    drive(-100, directions.SIDE, .25);
+                } else if (red == false) {
+                    drive(100, directions.SIDE, .25);
+                }
+            }
+        }
+        else if(position== 'R'){
+            //Then turn right 90 degrees drop pixel at right
+            turn(-90, directions.RIGHT, .25);
+            drive(1.5, directions.FORWARD, .25);
+            arm.setTargetPos(-100);
+            clawr.setPosition(0.7);
+            drive(-3, directions.FORWARD, .25);
+            if(backstage == true && red == false){
+                turn(90, directions.RIGHT, .25);
+                drive(30, directions.FORWARD, .25);
+                clawl.setPosition(0.6);
+                drive(-3, directions.FORWARD, .25);
+                if (red == true) {
+                    drive(-100, directions.SIDE, .25);
+                } else if (red == false) {
+                    drive(100, directions.SIDE, .25);
+                }
             }
 
+        }
         leftFront.setPower(0);
         rightFront.setPower(0);
         leftBack.setPower(0);
