@@ -21,9 +21,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  */
 
 @TeleOp
-@Disabled
 public class outreach extends OpMode
-{private DcMotor BL;
+{
+    private DcMotor BL;
     private DcMotor BR;
     private DcMotor FL;
     private DcMotor FR;
